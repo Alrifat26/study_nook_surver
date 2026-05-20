@@ -10,10 +10,12 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(
+  app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://study-nook-client-lt9a.vercel.app",
+    ],
     credentials: true,
   })
 );
