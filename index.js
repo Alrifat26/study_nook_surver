@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", process.env.CLIENT_URL],
+    origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
@@ -42,7 +42,7 @@ const verifyToken = (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const db = client.db("studyNookDB");
     const roomsCollection = db.collection("rooms");
     const bookingsCollection = db.collection("bookings");
@@ -50,7 +50,8 @@ async function run() {
 
     console.log("MongoDB Connected Successfully");
 
-    app.get("/", (req, res) => res.send("StudyNook Server Running..."));
+    // Default Route
+    app.get("/", (req, res) => res.send("StudyNook Server Running Perfectly!"));
 
     // --- Auth Routes ---
     app.post("/users", async (req, res) => {
@@ -72,13 +73,11 @@ async function run() {
     });
 
     // --- Room Routes ---
-    // সব রুম দেখা
     app.get("/rooms", async (req, res) => {
       const result = await roomsCollection.find().toArray();
       res.send(result);
     });
 
-    // নির্দিষ্ট আইডি দিয়ে রুম দেখা
     app.get("/rooms/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -86,7 +85,6 @@ async function run() {
       res.send(room);
     });
 
-    // নতুন রুম অ্যাড করা (Auth Required)
     app.post("/rooms", verifyToken, async (req, res) => {
       const roomData = { ...req.body, ownerEmail: req.user.email, createdAt: new Date() };
       const result = await roomsCollection.insertOne(roomData);
@@ -100,7 +98,6 @@ async function run() {
       res.send(result);
     });
 
-    // আমার বুকিং দেখার রুট (Bonus)
     app.get("/my-bookings", verifyToken, async (req, res) => {
       const email = req.user.email;
       const result = await bookingsCollection.find({ userEmail: email }).toArray();
@@ -108,9 +105,9 @@ async function run() {
     });
 
     app.get("/my-listings", verifyToken, async (req, res) => {
-    const email = req.user.email;
-    const result = await roomsCollection.find({ ownerEmail: email }).toArray();
-    res.send(result);
+      const email = req.user.email;
+      const result = await roomsCollection.find({ ownerEmail: email }).toArray();
+      res.send(result);
     });
 
   } finally { }
